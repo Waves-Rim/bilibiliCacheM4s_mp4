@@ -71,7 +71,7 @@ for name in os.path.listdir(cache_dir):
             empty["groupTitle"] = "others"
         cacheInfo.append(empty)
         
-# 3. 统计视频作者名称，及其分组名称，创建分组目录。检查名称是否合法，并休整
+# 3. 统计视频作者名称，及其分组名称，创建分组目录。
 groupDir = {}
 for item in cacheInfo:
     groupDir[item["uname"]] = []
@@ -80,15 +80,41 @@ for item in cacheInfo:
         groupDir[item["uname"]].append(item["groupTitle"])
 
 mp4Dir = "E:\\mp4dir"
-f_log = open(os.path.join(mp4Dir, 'log.txt'), 'w')
 for uname in groupDir:
     for groupName in groupDir[uname]:
         groupNumber = groupDir[uname].index(groupName)
-        groupPath = os.path.join(mp4Dir, uname, groupNumber)
-        f_log.write(groupPath + ":::" + groupName)
+        groupPath = os.path.join(mp4Dir, uname, str(groupNumber))
         mkd_cmd = "mkdir " + groupPath
         os.system(mkd_cmd)
+        with open(os.path.join(groupPath, "groupName.txt"), 'w') as ftxt:
+            ftxt.write(groupName + '\n' + groupPath)
 
-# 4. 休整m4s文件，
+# 4. 休整m4s文件，然后合并为mp4，并存储于分组目录中。
+for item in cacheInfo:
+    uname = item["uname"]
+    groupName = item["groupTitle"]
+    groupNumber = groupDir[uname].index(groupName)
+    mp4Name = ''
+    illegaSymbols = "[]<>\\|/?*+ \r\n"
+    for symbol in item["title"]:
+        if symbol not in illegaSymbols:
+            mp4Name += symbol
+    mp4Name += '.mp4'
+    mp4Path = os.path.join(mp4Dir, uname, str(groupNumber), mp4Name)
+    
+    m4sCachePath1 = os.path.join(mp4Dir, "cache1.m4s")
+    with open(item["m4sPath"][1], 'rb') as frb_m4s1:
+        with open(m4sCachePath1, 'wb') as fwb_m4s1:
+            fwb_m4s1.write(frb_m4s1.read()[9:])
+    m4sCachePath2 = os.path.join(mp4Dir, "cache2.m4s")
+    with open(item["m4sPath"][2], 'rb') as frb_m4s2:
+        with open(m4sCachePath1, 'wb') as fwb_m4s2:
+            fwb_m4s2.write(frb_m4s2.read()[9:])
+            
+    ff_cmd = "ffmpeg -i " + m4sCachePath1 + " -i " + m4sCachePath2 + " -c copy " + mp4Path
+    ex = subprocess.Popen(ff_cmd, close_fds=True)
+    ex.wait()
+    os.remove(m4sCachePath1)
+    os.remove(m4sCachePath2)
 ```
 
