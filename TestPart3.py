@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import subprocess
 
 cache_dir = "E:\\bilibili_cache"
@@ -44,11 +45,10 @@ for uname in groupDir:
         mkd_cmd = "mkdir " + groupPath
         if not os.path.isdir(groupPath):
             os.system(mkd_cmd)
-        else:
-            print(groupPath,"已存在")
         with open(os.path.join(groupPath, "groupName.txt"), 'w') as ftxt:
             ftxt.write(groupName + '\n' + groupPath)
 
+cachePath = "E:\\mp4dir\\m4sCache"
 for item in cacheInfo:
     uname = item["uname"]
     groupName = item["groupTitle"]
@@ -61,20 +61,26 @@ for item in cacheInfo:
     mp4Name += '.mp4'
     mp4Path = os.path.join(mp4Dir, uname, str(groupNumber), mp4Name)
     
-    m4sCachePath1 = os.path.join(mp4Dir, "cache1.m4s")
-    print(item["m4sPath"][1])
+    m4sCachePath1 = os.path.join(cachePath, "cache1.m4s")
     with open(item["m4sPath"][1], 'rb') as frb_m4s1:
         with open(m4sCachePath1, 'wb') as fwb_m4s1:
             fwb_m4s1.write(frb_m4s1.read()[9:])
-    m4sCachePath2 = os.path.join(mp4Dir, "cache2.m4s")
-    print(item["m4sPath"][2])
+    m4sCachePath2 = os.path.join(cachePath, "cache2.m4s")
     with open(item["m4sPath"][2], 'rb') as frb_m4s2:
         with open(m4sCachePath2, 'wb') as fwb_m4s2:
             fwb_m4s2.write(frb_m4s2.read()[9:])
             
-    ff_cmd = "ffmpeg -i " + m4sCachePath1 + " -i " + m4sCachePath2 + " -c copy " + mp4Path
+    ff_cmd = "ffmpeg -i " + m4sCachePath1 + " -i " + m4sCachePath2 + " -c copy " + mp4Path + " -y"
     print(ff_cmd)
     ex = subprocess.Popen(ff_cmd, close_fds=True)
     ex.wait()
-    os.remove(m4sCachePath1)
-    os.remove(m4sCachePath2)
+
+    cleanCacheCmd = "del " + os.path.join(cachePath, "*.m4s")
+    print(cleanCacheCmd)
+    clrBatPath = os.path.join(cachePath, "clr.bat")
+    with open(clrBatPath, 'w') as fbat:
+        fbat.write(cleanCacheCmd)
+    ex = subprocess.Popen(clrBatPath, close_fds=True)
+    ex.wait()
+    
+    print("Done " + str(cacheInfo.index(item) + 1) + '/' + str(len(cacheInfo)))
