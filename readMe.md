@@ -53,7 +53,7 @@ for name in os.path.listdir(cache_dir):
     if os.path.isdir(namePath):
         empty = {}
         empty["dir_id"] = name
-        filesPath = os.path.listdir(namePath)
+        filesPath = os.listdir(namePath)
         empty["m4sPath"].append(os.path.join(namePath, '\\.videoInfo'))
         for fileName in filesPath:
             if '.m4s' in fileName:
