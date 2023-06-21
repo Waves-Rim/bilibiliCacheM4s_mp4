@@ -3,7 +3,7 @@ import json
 import time
 import subprocess
 
-cache_dir = "E:\\bilibili_cache"
+cache_dir = "E:\\P1\\bilibili_cache"
 
 cacheInfo = []
 for name in os.listdir(cache_dir):
@@ -18,6 +18,8 @@ for name in os.listdir(cache_dir):
         for fileName in filesPath:
             if '.m4s' in fileName:
                 empty["m4sPath"].append(os.path.join(namePath, fileName))
+        if len(empty["m4sPath"]) < 3:
+            continue
         try:
             with open(empty["m4sPath"][0], encoding='utf-8') as frd:
                 videoInfo = json.load(frd)
@@ -37,7 +39,7 @@ for item in cacheInfo:
     if item["groupTitle"] not in groupDir[item["uname"]]:
         groupDir[item["uname"]].append(item["groupTitle"])
 
-mp4Dir = "E:\\mp4dir"
+mp4Dir = "E:\\P1\\mp4dir"
 for uname in groupDir:
     for groupName in groupDir[uname]:
         groupNumber = groupDir[uname].index(groupName)
@@ -48,7 +50,7 @@ for uname in groupDir:
         with open(os.path.join(groupPath, "groupName.txt"), 'w') as ftxt:
             ftxt.write(groupName + '\n' + groupPath)
 
-cachePath = "E:\\mp4dir\\m4sCache"
+cachePath = os.path.join(mp4Dir, "m4sCache")
 for item in cacheInfo:
     uname = item["uname"]
     groupName = item["groupTitle"]
